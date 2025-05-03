@@ -22,7 +22,7 @@ public class MapperConfig : Profile
         CreateMap<Expense, ExpenseResponse>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name + " " + src.User.Surname))
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => src.ExpenseStatus.ToString()));
         
         // ExpenseCategory mapping
         CreateMap<ExpenseCategoryRequest, ExpenseCategory>();

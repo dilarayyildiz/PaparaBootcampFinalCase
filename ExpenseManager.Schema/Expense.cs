@@ -6,6 +6,7 @@ public class ExpenseRequest
     public int CategoryId { get; set; }
     public decimal Amount { get; set; }
     public string Description { get; set; }
+    public string ExpenseStatus { get; set; } // enum string
     public string PaymentMethod { get; set; }
     public string PaymentLocation { get; set; }
     public string ReceiptUrl { get; set; } // fiş/fatura yükleme bağlantısı
@@ -20,7 +21,7 @@ public class ExpenseResponse
     public string CategoryName { get; set; } // Category.Name
     public decimal Amount { get; set; }
     public string Description { get; set; }
-    public string Status { get; set; } // enum string
+    public string ExpenseStatus { get; set; } // enum string
     public string? RejectionReason { get; set; }
     public string ReceiptUrl { get; set; }
     public string PaymentMethod { get; set; }

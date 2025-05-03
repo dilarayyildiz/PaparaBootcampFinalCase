@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using AutoMapper;
 using ExpenseManager.Api.Entities;
+using ExpenseManager.Api.Impl.Command;
 using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Api.Mapper;
 using ExpenseManager.Api.Services.Token;
@@ -18,94 +19,43 @@ namespace ExpenseManager.Api;
 
 public class Startup
 {
-    public IConfiguration Configuration { get; }
     
+    public IConfiguration Configuration { get; }
     public static JwtConfig JwtConfig { get; private set; }
     public Startup(IConfiguration configuration) => Configuration = configuration;
-
     public void ConfigureServices(IServiceCollection services)
     {
         JwtConfig = Configuration.GetSection("JwtConfig").Get<JwtConfig>();
         services.AddSingleton<JwtConfig>(JwtConfig);
-
-        services.AddControllers().AddFluentValidation(x =>
-        {
-            x.RegisterValidatorsFromAssemblyContaining<CustomerValidator>();
-        });
-
-       /* services.AddControllersWithViews(options =>
-        {
-            options.CacheProfiles.Add("Default45",
-                new CacheProfile
-                {
-                    Duration = 45,
-                    Location = ResponseCacheLocation.Any,
-                    NoStore = false
-                });
-        });*/
-     
-        
-
-        services.AddSingleton(new MapperConfiguration(x => x.AddProfile(new MapperConfig())).CreateMapper());
-
+        services.AddAutoMapper(typeof(MapperConfig));
+        services.AddControllers(); 
         services.AddDbContext<ExpenseManagerDbContext>(options =>
         {
-            options.UseSqlServer(Configuration.GetConnectionString("MsSqlConnection"));
+            options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerContext"));
         });
-           
-        
-        /*
-         * Senin projende:
-           
-           Kendi User entity’in var.
-           Kendi JWT üretimini yazıyorsun.
-           Kendi şifre hash kontrolünü yazıyorsun.
-           ApplicationUser kullanmıyorsun.
-           Yani sen ASP.NET Identity’ye bağlı değilsin → bu satıra ihtiyacın yok.
-           
-           Bu blok sadece ApplicationUser + Identity bazlı sistemlerde gereklidir.
-           
-         */
-        
-        /*services.AddIdentityCore<ApplicationUser>(options =>
-        {
-            options.Password.RequireDigit = false;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredUniqueChars = 1;            
-            options.User.RequireUniqueEmail = true;
-            options.SignIn.RequireConfirmedAccount = false;
-            options.SignIn.RequireConfirmedEmail = false;
-            options.Lockout.AllowedForNewUsers = true;
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.AllowedForNewUsers = true;
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            options.User.RequireUniqueEmail = true;
-            options.SignIn.RequireConfirmedAccount = false;
-            options.SignIn.RequireConfirmedEmail = false;
-        }).AddEntityFrameworkStores<ExpenseManagerDbContext>();*/
-
+        //services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(typeof(CreateAuthorizationTokenCommand).Assembly);
+            cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
         });
-
-        //services.AddScoped<ScopedService>();
-        //services.AddTransient<TransientService>();
-       // services.AddSingleton<SingletonService>();
-        //services.AddScoped<IAccountService, AccountService>();
+        //services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(AuthorizationCommandHandler).GetTypeInfo().Assembly));
+        
+        /* services.AddControllers().AddFluentValidation(x =>
+        {
+            x.RegisterValidatorsFromAssemblyContaining<CustomerValidator>();
+        });*!!!!açılacak*/
+        
+        // TokenService
         services.AddScoped<ITokenService, TokenService>();
-        //services.AddScoped<IUnitOfWork, UnitOfWork>();
-       // services.AddSingleton<INotificationService, NotificationService>();
 
-        services.AddResponseCaching();
-        services.AddMemoryCache();
-
+        // HttpContextAccessor + AppSession
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAppSession>(provider =>
+        {
+            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+            AppSession appSession = JwtExtension.GetSession(httpContextAccessor.HttpContext);
+            return appSession;
+        });
         services.AddAuthentication(x =>
         {
             x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -126,13 +76,12 @@ public class Startup
                 ClockSkew = TimeSpan.FromMinutes(2)
             };
         });
-
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Expense Manager Api Management", Version = "v1.0" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExpenseManager Api Management", Version = "v1.0" });
             var securityScheme = new OpenApiSecurityScheme
             {
-                Name = "Authorization",
+                Name = "Para Management for IT Company",
                 Description = "Enter JWT Bearer token **_only_**",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
@@ -147,74 +96,46 @@ public class Startup
             c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                    { securityScheme, new string[] { } }
+                { securityScheme, new string[] { } }
             });
         });
-// CORS (frontend bağlıysa)
+        
+        // CORS (if needed)
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
         });
         
-        services.AddScoped<IAppSession>(provider =>
-        {
-            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
-            AppSession appSession = JwtExtension.GetSession(httpContextAccessor.HttpContext);
-            return appSession;
-        });
-
-       /*Redis kullanacak mıyım düşüneceğim!!!!!!
-       var resdisConnection = new ConfigurationOptions();
-        resdisConnection.EndPoints.Add(Configuration["Redis:Host"], Convert.ToInt32(Configuration["Redis:Port"]));
-        resdisConnection.DefaultDatabase = 0;
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.ConfigurationOptions = resdisConnection;
-            options.InstanceName = Configuration["Redis:InstanceName"];
-        });
-       */
-       
-        
+        /////////////services.AddSwaggerGen(); 
     }
+   
 
-
+    
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseSwagger();
+        app.UseSwaggerUI();
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            
         }
-
-        //app.UseMiddleware<HeartBeatMiddleware>();
-        //app.UseMiddleware<ErrorHandlerMiddleware>();
-
-        // Action<RequestProfilerModel> requestResponseHandler = requestProfilerModel =>
-        // {
-        //     Log.Information("-------------Request-Begin------------");
-        //     Log.Information(requestProfilerModel.Request);
-        //     Log.Information(Environment.NewLine);
-        //     Log.Information(requestProfilerModel.Response);
-        //     Log.Information("-------------Request-End------------");
-        // };
-        // app.UseMiddleware<RequestLoggingMiddleware>(requestResponseHandler);
-
         
+   
         app.UseHttpsRedirection();
-        app.UseAuthentication();
+        
         app.UseRouting();
-        app.UseAuthorization();
-        app.UseResponseCaching();
+        
+        app.UseCors("AllowAll"); // if CORS policy is used
+        
+        app.UseAuthentication();
+        app.UseAuthorization(); 
+        
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        
-        
-
     }
 }

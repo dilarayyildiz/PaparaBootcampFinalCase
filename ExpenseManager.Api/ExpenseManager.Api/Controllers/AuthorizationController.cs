@@ -14,10 +14,10 @@ namespace ExpenseManager.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthorizationController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     public AuthorizationController(IMediator mediator)
     {
-        this.mediator = mediator;
+        this._mediator = mediator;
     }
 
     [HttpPost("Token")]
@@ -29,7 +29,7 @@ public class AuthorizationController : ControllerBase
     public async Task<ApiResponse<AuthorizationResponse>> Post([FromBody] AuthorizationRequest request)
     {
         var operation = new CreateAuthorizationTokenCommand(request);
-        var result = await mediator.Send(operation);
+        var result = await _mediator.Send(operation);
         return result;
     }
 

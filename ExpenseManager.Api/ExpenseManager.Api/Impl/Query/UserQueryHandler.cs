@@ -22,9 +22,9 @@ public class UserQueryHandler :
     }
     public async Task<ApiResponse<List<UserResponse>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var Users = await context.Set<User>().ToListAsync(cancellationToken);
+        var users = await context.Set<User>().ToListAsync(cancellationToken);
 
-        var mapped = mapper.Map<List<UserResponse>>(Users);
+        var mapped = mapper.Map<List<UserResponse>>(users);
         return new ApiResponse<List<UserResponse>>(mapped);
     }
 
@@ -33,9 +33,12 @@ public class UserQueryHandler :
         var predicate = PredicateBuilder.New<User>(true);
         predicate = predicate.And(x => x.Id == request.Id);
 
-        var User = await context.Set<User>().FirstOrDefaultAsync(predicate, cancellationToken);
+        var user = await context.Set<User>().FirstOrDefaultAsync(predicate, cancellationToken);
 
-        var mapped = mapper.Map<UserResponse>(User);
+        if (user == null)
+            return new ApiResponse<UserResponse>("User not found");
+        
+        var mapped = mapper.Map<UserResponse>(user);
         return new ApiResponse<UserResponse>(mapped);
     }
     

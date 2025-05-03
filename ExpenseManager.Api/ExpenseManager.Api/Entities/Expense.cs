@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExpenseManager.Api.Entities;
 public enum ExpenseStatus { Pending = 1, Approved = 2, Rejected = 3 }
+
 [Table("Expense", Schema = "dbo")]
 public class Expense : BaseEntity
 { 
@@ -14,7 +15,7 @@ public class Expense : BaseEntity
     public ExpenseCategory Category { get; set; } = null!;
     public decimal Amount { get; set; }
     public string Description { get; set; } = null!;
-    public ExpenseStatus Status { get; set; }
+    public ExpenseStatus ExpenseStatus { get; set; }
     public string? RejectionReason { get; set; }
     public string ReceiptUrl { get; set; }
     public string PaymentMethod { get; set; }
@@ -38,7 +39,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.Property(x => x.CategoryId).IsRequired();
         builder.Property(x => x.Amount).IsRequired();
         builder.Property(x => x.Description).IsRequired().HasMaxLength(50);
-        builder.Property(x => x.Status).IsRequired();
+        builder.Property(x => x.ExpenseStatus).IsRequired();
         builder.Property(x => x.RejectionReason).HasMaxLength(50);
         builder.Property(x => x.ReceiptUrl).HasMaxLength(50);
         builder.Property(x => x.PaymentMethod).IsRequired().HasMaxLength(50);

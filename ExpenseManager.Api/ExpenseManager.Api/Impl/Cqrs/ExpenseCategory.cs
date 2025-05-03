@@ -6,8 +6,8 @@ namespace ExpenseManager.Api.Impl.Cqrs;
 
 public record GetAllExpenseCategoriesQuery : IRequest<ApiResponse<List<ExpenseCategoryResponse>>>;
 public record GetExpenseCategoriesByIdQuery(int Id) : IRequest<ApiResponse<ExpenseCategoryResponse>>;
-public record CreateExpenseCategoriesCommand(ExpenseCategoryRequest User) : IRequest<ApiResponse<ExpenseCategoryResponse>>;
-public record UpdateExpenseCategoriesCommand(int Id, ExpenseCategoryRequest User) : IRequest<ApiResponse>;
-public record DeleteExpenseCategoriesCommand(int Id) : IRequest<ApiResponse>;
+public record CreateExpenseCategoryCommand(ExpenseCategoryRequest ExpenseCategory) : IRequest<ApiResponse<ExpenseCategoryResponse>>;
+public record UpdateExpenseCategoryCommand(int Id, ExpenseCategoryRequest ExpenseCategory) : IRequest<ApiResponse>;
+public record DeleteExpenseCategoryCommand(int Id) : IRequest<ApiResponse>;
 
 
