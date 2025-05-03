@@ -43,18 +43,36 @@ public class ExpenseController : ControllerBase
         return result;
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("UpdateExpense/{id}")]
     public async Task<ApiResponse> UpdateExpense(int id, [FromBody] ExpenseRequest request)
     {
         var command = new UpdateExpenseCommand(id, request);
         var result = await mediator.Send(command);
         return result;
     }
+    
+    [HttpPut("ApproveExpense/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ApiResponse> ApproveExpense(int id)
+    {
+        var command = new ApproveExpenseCommand(id);
+        var result = await mediator.Send(command);
+        return result;
+    }
 
-    [HttpDelete("{id}")]
+    [HttpPut("RejectExpense/{id}")] 
+    [Authorize(Roles = "Admin")]
+    public async Task<ApiResponse> RejectExpense(int id, [FromBody] RejectExpenseRequest request)
+    {
+        var command = new RejectExpenseCommand(id, request.RejectionReason);
+        var result = await mediator.Send(command);
+        return result;
+    }
+    
+    [HttpDelete("CancelExpense/{id}")]
     public async Task<ApiResponse> DeleteExpense(int id)
     {
-        var command = new DeleteExpenseCommand(id);
+        var command = new CancelExpenseCommand(id);
         var result = await mediator.Send(command);
         return result;
     }

@@ -12,7 +12,9 @@ namespace ExpenseManager.Api.Impl.Command;
 public class ExpenseCommandHandler :
     IRequestHandler<CreateExpenseCommand, ApiResponse<ExpenseResponse>>,
     IRequestHandler<UpdateExpenseCommand, ApiResponse>,
-    IRequestHandler<DeleteExpenseCommand, ApiResponse>
+    IRequestHandler<CancelExpenseCommand, ApiResponse>,
+    IRequestHandler<ApproveExpenseCommand, ApiResponse>,
+    IRequestHandler<RejectExpenseCommand, ApiResponse>
 {
     private readonly ExpenseManagerDbContext dbContext;
     private readonly IMapper mapper;
@@ -45,24 +47,7 @@ public class ExpenseCommandHandler :
         var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (expense == null)
             return new ApiResponse("Expense not found");
-
-        //enum donusumu oldugu icin burada tabloda Onaylandı = 2 olacak gibi kontrol
-        if (request.Expense.ExpenseStatus == ExpenseStatus.Approved.ToString())
-        { 
-            var user = await dbContext.Set<User>()
-                .FirstOrDefaultAsync(x => x.Id == expense.UserId, cancellationToken);
-
-            if (user != null)
-            {
-                await accountHistoryService.CreateHistoryAsync(user.Id, expense.Amount, user.IBAN, cancellationToken);
-            }
-            else
-            {
-                return new ApiResponse("payment failed");
-            }
-        }
-            
-        
+ 
         expense.Amount = request.Expense.Amount;
         expense.Description = request.Expense.Description;
         expense.PaymentMethod = request.Expense.PaymentMethod;
@@ -75,7 +60,49 @@ public class ExpenseCommandHandler :
 
         return new ApiResponse();
     }
-    public async Task<ApiResponse> Handle(DeleteExpenseCommand request, CancellationToken cancellationToken)
+    
+    public async Task<ApiResponse> Handle (ApproveExpenseCommand request, CancellationToken cancellationToken)
+    {
+        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
+        if (expense == null)
+            return new ApiResponse("Expense not found");
+
+        var user = await dbContext.Set<User>()
+            .FirstOrDefaultAsync(x => x.Id == expense.UserId, cancellationToken);
+
+        if (user != null)
+        {
+            await accountHistoryService.CreateHistoryAsync(user.Id, expense.Amount, user.IBAN, cancellationToken);
+        }
+        else
+        {
+            return new ApiResponse("payment failed");
+        }
+         
+        expense.ExpenseStatus = ExpenseStatus.Approved;
+
+        dbContext.Set<Expense>().Update(expense);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse();
+    }
+    
+    public async Task<ApiResponse> Handle (RejectExpenseCommand request, CancellationToken cancellationToken)
+    {
+        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
+        if (expense == null)
+            return new ApiResponse("Expense not found");
+
+        expense.RejectionReason = request.RejectionReason;
+        expense.ExpenseStatus = ExpenseStatus.Rejected;
+
+        dbContext.Set<Expense>().Update(expense);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse();
+    }
+    
+    public async Task<ApiResponse> Handle(CancelExpenseCommand request, CancellationToken cancellationToken)
     {
         var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (expense == null)
@@ -88,4 +115,6 @@ public class ExpenseCommandHandler :
 
         return new ApiResponse();
     }
+
+   
 }
