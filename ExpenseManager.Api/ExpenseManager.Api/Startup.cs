@@ -5,6 +5,7 @@ using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Command;
 using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Api.Mapper;
+using ExpenseManager.Api.Services.AccountHistory;
 using ExpenseManager.Api.Services.Token;
 using ExpenseManager.Base;
 using ExpenseManager.Base.Token;
@@ -47,6 +48,7 @@ public class Startup
         
         // TokenService
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAccountHistoryService, AccountHistoryService>();
 
         // HttpContextAccessor + AppSession
         services.AddHttpContextAccessor();

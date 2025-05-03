@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExpenseManager.Api.Entities;
-[Table("AccountHistory", Schema = "bank")]
+
+[Table("AccountHistory", Schema = "dbo")]
 public class AccountHistory : BaseEntity
 { 
     public decimal  Balance { get; set; }
