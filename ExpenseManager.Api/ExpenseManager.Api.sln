@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseManager.Api", "ExpenseManager.Api\ExpenseManager.Api.csproj", "{F1C7F002-1A15-46FD-829A-48F3054FD039}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseManager.Base", "..\ExpenseManager.Base\ExpenseManager.Base.csproj", "{70EB4370-5674-4424-92A2-96E1D9BB4258}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseManager.Schema", "..\ExpenseManager.Schema\ExpenseManager.Schema.csproj", "{EC585A6B-AE0E-43F1-A6B1-11BB70CC162C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1C7F002-1A15-46FD-829A-48F3054FD039}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C7F002-1A15-46FD-829A-48F3054FD039}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C7F002-1A15-46FD-829A-48F3054FD039}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C7F002-1A15-46FD-829A-48F3054FD039}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70EB4370-5674-4424-92A2-96E1D9BB4258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70EB4370-5674-4424-92A2-96E1D9BB4258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70EB4370-5674-4424-92A2-96E1D9BB4258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70EB4370-5674-4424-92A2-96E1D9BB4258}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC585A6B-AE0E-43F1-A6B1-11BB70CC162C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC585A6B-AE0E-43F1-A6B1-11BB70CC162C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC585A6B-AE0E-43F1-A6B1-11BB70CC162C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC585A6B-AE0E-43F1-A6B1-11BB70CC162C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
