@@ -13,7 +13,7 @@ public class Account : BaseEntity
     public decimal Balance { get; set; }
     public string Currency { get; set; }
     public DateTime OpenDate { get; set; }
-    public DateTime? CloeseDate { get; set; }
+    public DateTime? CloseDate { get; set; }
     //public ICollection<AccountHistory> Expenses { get; set; }
     public virtual List<AccountHistory> AccountHistories { get; set; }
 }
@@ -29,6 +29,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(x => x.Balance).IsRequired();
         builder.Property(x => x.Currency).IsRequired().HasMaxLength(3);
         builder.Property(x => x.OpenDate).IsRequired();
-        builder.Property(x => x.CloeseDate).IsRequired(false);
+        builder.Property(x => x.CloseDate).IsRequired(false);
     }
 }   

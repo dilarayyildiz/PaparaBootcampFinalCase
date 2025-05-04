@@ -13,7 +13,8 @@ namespace ExpenseManager.Api.Impl.Command;
 public class UserCommandHandler:
     IRequestHandler<CreateUserCommand, ApiResponse<UserResponse>>,
     IRequestHandler<UpdateUserCommand, ApiResponse>,
-    IRequestHandler<DeleteUserCommand, ApiResponse>
+    IRequestHandler<DeleteUserCommand, ApiResponse>,
+    IRequestHandler<ChangeUserPasswordCommand, ApiResponse>
 {
     
     private readonly ExpenseManagerDbContext dbContext;
@@ -63,10 +64,8 @@ public class UserCommandHandler:
         if (!user.IsActive)
             return new ApiResponse("User is not active");
 
-        user.FirstName = request.User.FirstName;
-        user.LastName = request.User.LastName;
-        user.Phone = request.User.Phone;
-        user.Role = Enum.Parse<UserRole>(request.User.Role);
+        user.Secret = Guid.NewGuid().ToString();
+        user.PasswordHash = PasswordGenerator.CreateMD5(request.User.Password, user.Secret); 
         
         //Iban update olursa bankacılık bozulur DEGERLENDIR
         //user.IBAN = request.User.IBAN; 
@@ -75,6 +74,22 @@ public class UserCommandHandler:
         
         //TESTLER SONRASI BAKILACAK
         //await dbContext.SaveChangesAsync(cancellationToken);
+        return new ApiResponse();
+    }
+    public async Task<ApiResponse> Handle(ChangeUserPasswordCommand request, CancellationToken cancellationToken)
+    {
+        var user = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Email == request.User.email, cancellationToken);
+        if (user == null)
+            return new ApiResponse("User not found");
+
+        if (!user.IsActive)
+            return new ApiResponse("User is not active");
+ 
+        user.Secret = Guid.NewGuid().ToString();
+        user.PasswordHash = PasswordGenerator.CreateMD5(request.User.Password, user.Secret); 
+         
+        dbContext.Set<User>().Update(user);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return new ApiResponse();
     }
     public async Task<ApiResponse> Handle(DeleteUserCommand request, CancellationToken cancellationToken)

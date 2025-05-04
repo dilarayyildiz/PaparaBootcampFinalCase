@@ -25,6 +25,12 @@ public class MapperConfig : Profile
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => src.ExpenseStatus.ToString()));
         
+        CreateMap<CreateExpenseRequest, Expense>()
+            .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => ExpenseStatus.Pending)) // çünkü enum string geliyor
+            .ForMember(dest => dest.ReceiptUrl, opt => opt.Ignore()) // bu dosya işlemi handler’da yapılacak
+            .ForMember(dest => dest.Id, opt => opt.Ignore()); // Id DB tarafından atanacak
+
+        
         // ExpenseCategory mapping
         CreateMap<ExpenseCategoryRequest, ExpenseCategory>();
         CreateMap<ExpenseCategory, ExpenseCategoryResponse>();

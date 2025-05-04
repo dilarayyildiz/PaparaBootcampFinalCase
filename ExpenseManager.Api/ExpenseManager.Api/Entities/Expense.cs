@@ -42,7 +42,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.Property(x => x.Description).IsRequired().HasMaxLength(50);
         builder.Property(x => x.ExpenseStatus).IsRequired();
         builder.Property(x => x.RejectionReason).HasMaxLength(50);
-        builder.Property(x => x.ReceiptUrl).HasMaxLength(50);
+        builder.Property(x => x.ReceiptUrl).HasMaxLength(500);
         builder.Property(x => x.PaymentMethod).IsRequired().HasMaxLength(50);
         builder.Property(x => x.PaymentLocation).IsRequired().HasMaxLength(50); 
     }

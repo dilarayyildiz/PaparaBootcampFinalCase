@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExpenseManager.Api.Entities;
-public enum UserRole { Admin = 1, Personnel = 2 }
+public enum UserRole { Admin = 1, Employee = 2 }
 
 [Table("User", Schema = "dbo")]
 public class User : BaseEntity
@@ -38,10 +38,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Role).IsRequired();
         builder.Property(x => x.IBAN).IsRequired().HasMaxLength(50);
         builder.Property(x => x.IsActive).IsRequired();
-        
-        /*builder.HasIndex(x => x.Email).IsUnique();
+        builder.HasIndex(x => x.Email).IsUnique();
 
-        builder.HasMany(x => x.Expenses)
+        /*builder.HasMany(x => x.Expenses)
             .WithOne(e => e.User)
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);*/

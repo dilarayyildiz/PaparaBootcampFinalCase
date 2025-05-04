@@ -8,7 +8,6 @@ namespace ExpenseManager.Api.Entities;
 [Table("AccountHistory", Schema = "dbo")]
 public class AccountHistory : BaseEntity
 { 
-    public decimal  Balance { get; set; }
     public decimal TransactionAmount { get; set; }
     public DateTime TransactionDate { get; set; }
     //personel IBAN bilgisi (ödeme alan iban)
@@ -16,6 +15,7 @@ public class AccountHistory : BaseEntity
     //şirket IBAN bilgisi (ödeme yappan iban)
     public string FromIBAN { get; set; }
     public Guid ReferenceNumber { get; set; }
+    public decimal  BalanceAfterTransaction { get; set; }
  
 }
 
@@ -25,7 +25,7 @@ public class AccountHistoryConfiguration : IEntityTypeConfiguration<AccountHisto
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
-        builder.Property(x => x.Balance).IsRequired();
+        builder.Property(x => x.BalanceAfterTransaction).IsRequired();
         builder.Property(x => x.TransactionAmount).IsRequired();
         builder.Property(x => x.TransactionDate).IsRequired();
         builder.Property(x => x.ToIBAN).IsRequired().HasMaxLength(50);

@@ -7,7 +7,7 @@ namespace ExpenseManager.Api.Services.BankPaymentService;
 public class ExpensePaymentTransactionService : IExpensePaymentTransactionService
 {
     private readonly ExpenseManagerDbContext _dbContext;
-    private const string CompanyIBAN = "TR34 0000 0000 0000 0000 0000 00";
+    private const string CompanyIBAN = "TR340000000000000000000000";
 
     public ExpensePaymentTransactionService(ExpenseManagerDbContext dbContext)
     {
@@ -25,7 +25,7 @@ public class ExpensePaymentTransactionService : IExpensePaymentTransactionServic
 
         var history = new Entities.AccountHistory
         {
-            Balance = updatedBalance,
+            BalanceAfterTransaction = updatedBalance,
             TransactionAmount = transactionAmount,
             TransactionDate = DateTime.UtcNow,
             ToIBAN  = iban,

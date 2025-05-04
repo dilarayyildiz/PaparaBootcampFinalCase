@@ -27,7 +27,7 @@ public class CreateBankAccountService
             Balance = 0,
             Currency = TurkishLiraCurruencyCode,
             OpenDate = DateTime.UtcNow,
-            CloeseDate = null
+            CloseDate = null
         };
 
         await _dbContext.Set<Account>().AddAsync(account, cancellationToken);

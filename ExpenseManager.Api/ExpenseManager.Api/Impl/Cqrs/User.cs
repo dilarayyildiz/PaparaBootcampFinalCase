@@ -8,6 +8,8 @@ namespace ExpenseManager.Api.Impl.Cqrs;
     public record GetUserByIdQuery(int Id) : IRequest<ApiResponse<UserResponse>>;
     public record CreateUserCommand(UserRequest User) : IRequest<ApiResponse<UserResponse>>;
     public record UpdateUserCommand(int Id, UserRequest User) : IRequest<ApiResponse>;
+
+    public record ChangeUserPasswordCommand(ChangeUserPasswordRequest User) : IRequest<ApiResponse>;
     public record DeleteUserCommand(int Id) : IRequest<ApiResponse>;
     
 

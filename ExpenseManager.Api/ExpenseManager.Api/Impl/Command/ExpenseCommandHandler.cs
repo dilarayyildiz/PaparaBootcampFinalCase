@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using AutoMapper;
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Api.Services.AccountHistory;
+using ExpenseManager.Api.Services.BankPaymentService;
 using ExpenseManager.Base.ApiResponse;
 using Microsoft.EntityFrameworkCore;
 using ExpenseManager.Schema;
@@ -19,19 +21,32 @@ public class ExpenseCommandHandler :
     private readonly ExpenseManagerDbContext dbContext;
     private readonly IMapper mapper;
     private readonly IExpensePaymentTransactionService _expensePaymentTransactionService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ExpenseCommandHandler(ExpenseManagerDbContext dbContext, IMapper mapper)
     {
         this.dbContext = dbContext;
         this.mapper = mapper;
+        _httpContextAccessor = new HttpContextAccessor();
+        _expensePaymentTransactionService = new ExpensePaymentTransactionService(dbContext);
         //aslında ihtiyac yok ama gpt koy dedi.
         //this.accountHistoryService = accountHistoryService;
     }
 
     public async Task<ApiResponse<ExpenseResponse>> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
     {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == "UserId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim))
+        {
+            return new ApiResponse<ExpenseResponse>("Unauthorized or missing UserId claim");
+        }
+
+        var userId = int.Parse(userIdClaim);
+        
         var expense = mapper.Map<Expense>(request.Expense);
-        expense.UserId = request.Expense.UserId;
+        expense.UserId = userId;
         expense.ExpenseStatus = ExpenseStatus.Pending;
         expense.IsActive = true;
         expense.ReceiptUrl = request.ReceptUrl;

@@ -22,8 +22,10 @@ public class UserQueryHandler :
     }
     public async Task<ApiResponse<List<UserResponse>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = await context.Set<User>().ToListAsync(cancellationToken);
-
+        
+       var users = await context.Set<User>()
+           .Where(u => u.IsActive)
+           .ToListAsync(cancellationToken);
         var mapped = mapper.Map<List<UserResponse>>(users);
         return new ApiResponse<List<UserResponse>>(mapped);
     }

@@ -7,6 +7,7 @@ using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Api.Mapper;
 using ExpenseManager.Api.Services.AccountHistory;
 using ExpenseManager.Api.Services.BankPaymentService;
+using ExpenseManager.Api.Services.ReportService;
 using ExpenseManager.Api.Services.Token;
 using ExpenseManager.Base;
 using ExpenseManager.Base.Token;
@@ -50,6 +51,7 @@ public class Startup
         // TokenService
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IExpensePaymentTransactionService, ExpensePaymentTransactionService>();
+        services.AddScoped<IReportService, ReportService>();
 
         // HttpContextAccessor + AppSession
         services.AddHttpContextAccessor();

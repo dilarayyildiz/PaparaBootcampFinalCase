@@ -4,6 +4,7 @@ using ExpenseManager.Api;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseManager.Api.Migrations
 {
     [DbContext(typeof(ExpenseManagerDbContext))]
-    partial class ExpenseManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250504194910_Account")]
+    partial class Account
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,7 +97,7 @@ namespace ExpenseManager.Api.Migrations
                     b.Property<int?>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("BalanceAfterTransaction")
+                    b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreateDate")
@@ -229,8 +232,8 @@ namespace ExpenseManager.Api.Migrations
 
                     b.Property<string>("ReceiptUrl")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(50)

@@ -30,7 +30,6 @@ public class ExpenseManagerDbContext : DbContext
 
         var auditLogs = new List<AuditLog>();
         
-        //
         var userEmail = _httpContextAccessor.HttpContext?.User?.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "anonymous";
 

@@ -27,5 +27,11 @@ public class UserResponse
     public bool IsActive { get; set; }
 }
 
+public class ChangeUserPasswordRequest
+{  
+    public string email { get; set; }
+    public string Password { get; set; } 
+}
+
 //Sensitive alanlar (örn. PasswordHash) kesinlikle dışarı çıkmaz.
 //Role enum, response tarafında okunabilir olsun diye string döner (örn. "Admin").
