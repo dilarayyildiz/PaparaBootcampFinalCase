@@ -18,6 +18,8 @@ public class Expense : BaseEntity
     public ExpenseStatus ExpenseStatus { get; set; }
     public string? RejectionReason { get; set; }
     public string ReceiptUrl { get; set; }
+    
+    public IFormFile ReceiptFile { get; set; }  
     public string PaymentMethod { get; set; }
     public string PaymentLocation { get; set; }
     
@@ -44,5 +46,6 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.Property(x => x.ReceiptUrl).HasMaxLength(50);
         builder.Property(x => x.PaymentMethod).IsRequired().HasMaxLength(50);
         builder.Property(x => x.PaymentLocation).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.ReceiptFile).IsRequired();
     }
 }

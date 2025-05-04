@@ -28,5 +28,9 @@
       <ProjectReference Include="..\..\ExpenseManager.Base\ExpenseManager.Base.csproj" /> 
       <ProjectReference Include="..\..\ExpenseManager.Schema\ExpenseManager.Schema.csproj" /> 
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="wwwroot\receipts\" />
+    </ItemGroup>
 
 </Project>

@@ -36,7 +36,7 @@ public class AuthorizationCommandHandler :
         var token = tokenService.GenerateToken(user);
         var entity = new AuthorizationResponse
         {
-            UserName = user.Name + " " + user.Surname,
+            UserName = user.FirstName + " " + user.LastName,
             Token = token,
             Expiration = DateTime.UtcNow.AddMinutes(jwtConfig.AccessTokenExpiration)
         };

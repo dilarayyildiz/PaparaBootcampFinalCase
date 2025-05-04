@@ -34,8 +34,31 @@ public class ExpenseCommandHandler :
         expense.UserId = request.Expense.UserId;
         expense.ExpenseStatus = ExpenseStatus.Pending;
         expense.IsActive = true;
+        expense.ReceiptUrl = request.ReceptUrl;
+        
+        //  Dosya varsa kaydet
+        if (request.Expense.ReceiptFile != null && request.Expense.ReceiptFile.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "receipts");
+            var uniqueFileName = $"{Guid.NewGuid()}_{request.Expense.ReceiptFile.FileName}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-        await dbContext.Set<Expense>().AddAsync(expense, cancellationToken);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await request.Expense.ReceiptFile.CopyToAsync(fileStream, cancellationToken);
+            }
+
+            expense.ReceiptUrl = $"/receipts/{uniqueFileName}";
+        }
+        else
+        {
+            //olmadı validatorden dönnn....
+            return new ApiResponse<ExpenseResponse>("Receipt file is required");
+        }
+        
+
+
+        await dbContext.Set<Expense>().AddAsync(expense, cancellationToken);    
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var response = mapper.Map<ExpenseResponse>(expense);
@@ -54,6 +77,7 @@ public class ExpenseCommandHandler :
         expense.PaymentLocation = request.Expense.PaymentLocation;
         expense.CategoryId = request.Expense.CategoryId;
         expense.ExpenseStatus = Enum.Parse<ExpenseStatus>(request.Expense.ExpenseStatus);
+        
 
         dbContext.Set<Expense>().Update(expense);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -80,6 +104,8 @@ public class ExpenseCommandHandler :
         }
          
         expense.ExpenseStatus = ExpenseStatus.Approved;
+        //DEğiştirilecek cons olarak eklenecek 
+        expense.PaymentMethod = "EFT";
 
         dbContext.Set<Expense>().Update(expense);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -116,5 +142,6 @@ public class ExpenseCommandHandler :
         return new ApiResponse();
     }
 
-   
+
+     
 }

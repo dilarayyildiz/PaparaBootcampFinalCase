@@ -58,8 +58,8 @@ public class UserCommandHandler
         if (!user.IsActive)
             return new ApiResponse("User is not active");
 
-        user.Name = request.User.Name;
-        user.Surname = request.User.SurName;
+        user.FirstName = request.User.FirstName;
+        user.LastName = request.User.LastName;
         user.Phone = request.User.Phone;
         user.Role = Enum.Parse<UserRole>(request.User.Role);
         

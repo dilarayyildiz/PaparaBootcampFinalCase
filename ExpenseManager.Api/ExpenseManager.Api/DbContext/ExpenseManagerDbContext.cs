@@ -8,19 +8,29 @@ namespace ExpenseManager.Api;
 
 public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
 {
-    private readonly ApplicationUser _applicationUser;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+   // private readonly ApplicationUser _applicationUser;
 
-    public ExpenseManagerDbContext(DbContextOptions<ExpenseManagerDbContext> options, IServiceProvider serviceProvider) : base(options)
+    //public ExpenseManagerDbContext(DbContextOptions<ExpenseManagerDbContext> options, IServiceProvider serviceProvider) : base(options)
+    public ExpenseManagerDbContext(
+        DbContextOptions<ExpenseManagerDbContext> options,
+        IHttpContextAccessor httpContextAccessor) : base(options)
     {
-        this._applicationUser = serviceProvider.GetService<ApplicationUser>();
+        _httpContextAccessor = httpContextAccessor;
+       // this._applicationUser = serviceProvider.GetService<ApplicationUser>();
     }
 
-    public virtual Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+   //async ekledim
+    public virtual async  Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entyList = ChangeTracker.Entries().Where(e => e.Entity is BaseEntity
          && (e.State == EntityState.Deleted || e.State == EntityState.Added || e.State == EntityState.Modified));
 
         var auditLogs = new List<AuditLog>();
+        
+        //
+        var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "anonymous";
+
 
         foreach (var entry in entyList)
         {
@@ -39,7 +49,9 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
                 EntityId = baseEntity.Id.ToString(),
                 Action = entry.State.ToString(),
                 Timestamp = DateTime.Now,
-                UserName = _applicationUser?.UserName ?? "anonymous",
+                //
+                UserName = userName,
+                //UserName = _applicationUser?.UserName ?? "anonymous",
                 ChangedValues = changedValuesString,
                 OriginalValues = originalValuesString,
             };
@@ -47,20 +59,23 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
             if (entry.State == EntityState.Added)
             {
                 baseEntity.CreateDate = DateTime.Now;
-                baseEntity.CreateUser = _applicationUser?.UserName ?? "anonymous";
+                baseEntity.CreateUser = userName;
+                //baseEntity.CreateUser = _applicationUser?.UserName ?? "anonymous";
                 baseEntity.IsActive = true;
             }
             else if (entry.State == EntityState.Modified)
             {
                 baseEntity.ModifyDate = DateTime.Now;
-                baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
+                baseEntity.ModifyUser = userName;
+                //baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
             }
             else if (entry.State == EntityState.Deleted)
             {
                 entry.State = EntityState.Modified;
                 baseEntity.IsActive = false;
                 baseEntity.ModifyDate = DateTime.Now;
-                baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
+                baseEntity.ModifyUser = userName;
+               // baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
             }
 
             auditLogs.Add(auditLog);
@@ -70,8 +85,8 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
         {
             Set<AuditLog>().AddRange(auditLogs);
         }
-
-        return base.SaveChangesAsync(cancellationToken);
+//await
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
 

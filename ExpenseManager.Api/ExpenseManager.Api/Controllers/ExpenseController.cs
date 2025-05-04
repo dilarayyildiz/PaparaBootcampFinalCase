@@ -1,4 +1,5 @@
 using ExpenseManager.Api.Impl.Cqrs;
+using ExpenseManager.Api.Request;
 using ExpenseManager.Base.ApiResponse;
 using ExpenseManager.Schema;
 using MediatR;
@@ -13,10 +14,12 @@ namespace ExpenseManager.Api.Controllers;
 public class ExpenseController : ControllerBase
 {
     private readonly IMediator mediator;
+    private readonly IWebHostEnvironment _environment;
 
-    public ExpenseController(IMediator mediator)
+    public ExpenseController(IMediator mediator, IWebHostEnvironment environment)
     {
         this.mediator = mediator;
+        _environment = environment;
     }
     
     [HttpGet]
@@ -35,10 +38,30 @@ public class ExpenseController : ControllerBase
         return result;
     }
 
-    [HttpPost]
-    public async Task<ApiResponse<ExpenseResponse>> CreateExpense([FromBody] ExpenseRequest request)
+    [HttpPost("CreateExpense")]
+    public async Task<ApiResponse<ExpenseResponse>> CreateExpense([FromForm] CreateExpenseRequest request)
     {
-        var command = new CreateExpenseCommand(request);
+        string receiptUrl = null;
+
+        if (request.ReceiptFile != null && request.ReceiptFile.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "receipts");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid() + Path.GetExtension(request.ReceiptFile.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await request.ReceiptFile.CopyToAsync(stream);
+            }
+
+            //Uniqıelestirmek için user name ve date eklencek
+            receiptUrl = $"{Request.Scheme}://{Request.Host}/receipts/{uniqueFileName}";
+        }
+        
+        var command = new CreateExpenseCommand(receiptUrl, request);
         var result = await mediator.Send(command);
         return result;
     }
@@ -46,6 +69,7 @@ public class ExpenseController : ControllerBase
     [HttpPut("UpdateExpense/{id}")]
     public async Task<ApiResponse> UpdateExpense(int id, [FromBody] ExpenseRequest request)
     {
+        
         var command = new UpdateExpenseCommand(id, request);
         var result = await mediator.Send(command);
         return result;

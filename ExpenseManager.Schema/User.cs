@@ -3,8 +3,8 @@ namespace ExpenseManager.Schema;
 
 public class UserRequest
 {
-    public string Name { get; set; }
-    public string SurName { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
     public string Password { get; set; } // API tarafında plain gelir, backend hashler
@@ -18,8 +18,8 @@ public class UserRequest
 public class UserResponse
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string SurName { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
     public string Role { get; set; }     // enum stringe dönüştürülür

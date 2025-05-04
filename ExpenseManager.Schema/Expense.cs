@@ -10,7 +10,8 @@ public class ExpenseRequest
     public string PaymentMethod { get; set; }
     public string? RejectionReason { get; set; }
     public string PaymentLocation { get; set; }
-    public string ReceiptUrl { get; set; } // fiş/fatura yükleme bağlantısı
+    //public IFormFile ReceiptFile { get; set; }  // dosya alanı
+    //public string ReceiptUrl { get; set; } // fiş/fatura yükleme bağlantısı
 }
 
 //Status girilmez → backend başta Pending atar.

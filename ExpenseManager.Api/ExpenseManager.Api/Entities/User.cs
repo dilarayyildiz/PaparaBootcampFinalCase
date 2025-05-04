@@ -9,8 +9,8 @@ public enum UserRole { Admin = 1, Personnel = 2 }
 [Table("User", Schema = "dbo")]
 public class User : BaseEntity
 {
-    public string Name { get; set; }
-    public string Surname { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
     public string PasswordHash { get; set; }
@@ -29,8 +29,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(x => x.Id);    
         //builder.Property(x => x.Id).ValueGeneratedOnAdd();
         //builder.Property(x => x.Id).UseIdentityColumn();
-        builder.Property(x => x.Name).IsRequired().HasMaxLength(50);
-        builder.Property(x => x.Surname).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.FirstName).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.LastName).IsRequired().HasMaxLength(50);
         builder.Property(x => x.Email).IsRequired().HasMaxLength(50);
         builder.Property(x => x.Phone).HasMaxLength(50);
         builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(50);

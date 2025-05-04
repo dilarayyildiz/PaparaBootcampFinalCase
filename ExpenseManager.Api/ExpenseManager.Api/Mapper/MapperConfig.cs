@@ -1,3 +1,4 @@
+using ExpenseManager.Api.Request;
 using ExpenseManager.Schema;
 
 namespace ExpenseManager.Api.Mapper;
@@ -20,7 +21,7 @@ public class MapperConfig : Profile
         // Expense mapping
         CreateMap<ExpenseRequest, Expense>();
         CreateMap<Expense, ExpenseResponse>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name + " " + src.User.Surname))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FirstName + " " + src.User.LastName))
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => src.ExpenseStatus.ToString()));
         
