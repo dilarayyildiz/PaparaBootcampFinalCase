@@ -1,18 +1,19 @@
 using ExpenseManager.Api.Entities;
+using ExpenseManager.Api.Services.AccountHistory;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseManager.Api.Services.AccountHistory;
+namespace ExpenseManager.Api.Services.BankPaymentService;
 
-public class AccountHistoryService : IAccountHistoryService
+public class ExpensePaymentTransactionService : IExpensePaymentTransactionService
 {
     private readonly ExpenseManagerDbContext _dbContext;
 
-    public AccountHistoryService(ExpenseManagerDbContext dbContext)
+    public ExpensePaymentTransactionService(ExpenseManagerDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task CreateHistoryAsync(int userId, decimal transactionAmount, string iban, CancellationToken cancellationToken)
+    public async Task ExpensePaymentTransactionAsync(int userId, decimal transactionAmount, string iban, CancellationToken cancellationToken)
     {
         // IBAN bazında mevcut toplam bakiyeyi hesapla
         decimal totalBalance = await _dbContext.Set<Entities.AccountHistory>()

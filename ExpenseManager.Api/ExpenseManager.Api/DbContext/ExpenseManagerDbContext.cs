@@ -29,7 +29,7 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
         var auditLogs = new List<AuditLog>();
         
         //
-        var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "anonymous";
+        var userName = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "anonymous";
 
 
         foreach (var entry in entyList)

@@ -18,7 +18,7 @@ public class ExpenseCommandHandler :
 {
     private readonly ExpenseManagerDbContext dbContext;
     private readonly IMapper mapper;
-    private readonly IAccountHistoryService accountHistoryService;
+    private readonly IExpensePaymentTransactionService _expensePaymentTransactionService;
 
     public ExpenseCommandHandler(ExpenseManagerDbContext dbContext, IMapper mapper)
     {
@@ -96,7 +96,7 @@ public class ExpenseCommandHandler :
 
         if (user != null)
         {
-            await accountHistoryService.CreateHistoryAsync(user.Id, expense.Amount, user.IBAN, cancellationToken);
+            await _expensePaymentTransactionService.ExpensePaymentTransactionAsync(user.Id, expense.Amount, user.IBAN, cancellationToken);
         }
         else
         {
