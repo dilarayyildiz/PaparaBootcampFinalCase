@@ -23,7 +23,13 @@ public class TokenService : ITokenService
     //}
     public string GenerateToken(User user)
     {
-        var claims = GetClaims(user);
+        var claims = new List<Claim>
+        {
+            new Claim("UserId", user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
+        };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

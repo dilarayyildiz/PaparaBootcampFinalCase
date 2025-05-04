@@ -1,4 +1,5 @@
 using AutoMapper;
+using MediatR;
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Base;
@@ -9,8 +10,12 @@ using ExpenseManager.Schema;
 
 namespace ExpenseManager.Api.Impl.Command;
 
-public class UserCommandHandler
+public class UserCommandHandler:
+    IRequestHandler<CreateUserCommand, ApiResponse<UserResponse>>,
+    IRequestHandler<UpdateUserCommand, ApiResponse>,
+    IRequestHandler<DeleteUserCommand, ApiResponse>
 {
+    
     private readonly ExpenseManagerDbContext dbContext;
     private readonly IMapper mapper;
     private readonly IAppSession appSession;

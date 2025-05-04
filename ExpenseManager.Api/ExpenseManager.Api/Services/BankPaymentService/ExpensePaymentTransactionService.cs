@@ -7,6 +7,7 @@ namespace ExpenseManager.Api.Services.BankPaymentService;
 public class ExpensePaymentTransactionService : IExpensePaymentTransactionService
 {
     private readonly ExpenseManagerDbContext _dbContext;
+    private const string CompanyIBAN = "TR34 0000 0000 0000 0000 0000 00";
 
     public ExpensePaymentTransactionService(ExpenseManagerDbContext dbContext)
     {
@@ -17,7 +18,7 @@ public class ExpensePaymentTransactionService : IExpensePaymentTransactionServic
     {
         // IBAN bazında mevcut toplam bakiyeyi hesapla
         decimal totalBalance = await _dbContext.Set<Entities.AccountHistory>()
-            .Where(x => x.IBAN == iban && x.IsActive)
+            .Where(x => x.ToIBAN == iban && x.IsActive)
             .SumAsync(x => x.TransactionAmount, cancellationToken);
 
         decimal updatedBalance = totalBalance + transactionAmount;
@@ -27,7 +28,8 @@ public class ExpensePaymentTransactionService : IExpensePaymentTransactionServic
             Balance = updatedBalance,
             TransactionAmount = transactionAmount,
             TransactionDate = DateTime.UtcNow,
-            IBAN = iban,
+            ToIBAN  = iban,
+            FromIBAN = CompanyIBAN,
             ReferenceNumber = Guid.NewGuid(),
             IsActive = true
         };

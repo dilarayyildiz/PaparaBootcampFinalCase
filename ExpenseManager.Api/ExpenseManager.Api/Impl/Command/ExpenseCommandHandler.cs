@@ -50,13 +50,7 @@ public class ExpenseCommandHandler :
 
             expense.ReceiptUrl = $"/receipts/{uniqueFileName}";
         }
-        else
-        {
-            //olmadı validatorden dönnn....
-            return new ApiResponse<ExpenseResponse>("Receipt file is required");
-        }
         
-
 
         await dbContext.Set<Expense>().AddAsync(expense, cancellationToken);    
         await dbContext.SaveChangesAsync(cancellationToken);

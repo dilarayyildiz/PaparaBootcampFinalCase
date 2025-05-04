@@ -33,7 +33,7 @@ public class Startup
         services.AddControllers(); 
         services.AddDbContext<ExpenseManagerDbContext>(options =>
         {
-            options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerContext"));
+            options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerDbConnection"));
         });
         //services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddMediatR(cfg =>

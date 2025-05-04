@@ -11,7 +11,10 @@ public class AccountHistory : BaseEntity
     public decimal  Balance { get; set; }
     public decimal TransactionAmount { get; set; }
     public DateTime TransactionDate { get; set; }
-    public string IBAN { get; set; }
+    //personel IBAN bilgisi (ödeme alan iban)
+    public string ToIBAN { get; set; }
+    //şirket IBAN bilgisi (ödeme yappan iban)
+    public string FromIBAN { get; set; }
     public Guid ReferenceNumber { get; set; }
  
 }
@@ -25,7 +28,8 @@ public class AccountHistoryConfiguration : IEntityTypeConfiguration<AccountHisto
         builder.Property(x => x.Balance).IsRequired();
         builder.Property(x => x.TransactionAmount).IsRequired();
         builder.Property(x => x.TransactionDate).IsRequired();
-        builder.Property(x => x.IBAN).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.ToIBAN).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.FromIBAN).IsRequired().HasMaxLength(50);
         builder.Property(x => x.ReferenceNumber).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
     }

@@ -33,8 +33,8 @@ public class MapperConfig : Profile
         CreateMap<AccountHistory, AccountHistoryResponse>();
         
         //ApplicationUser mapping
-        CreateMap<ApplicationUserRequest, ApplicationUser>();
-        CreateMap<ApplicationUser, ApplicationUserResponse>();
+        //CreateMap<ApplicationUserRequest, ApplicationUser>();
+        //CreateMap<ApplicationUser, ApplicationUserResponse>();
     }
 }
 

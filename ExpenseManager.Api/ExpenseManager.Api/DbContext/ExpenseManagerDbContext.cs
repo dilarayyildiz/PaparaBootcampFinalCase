@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -6,9 +7,10 @@ using ExpenseManager.Base;
 
 namespace ExpenseManager.Api;
 
-public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
+public class ExpenseManagerDbContext : DbContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    public DbSet<AuditLog> AuditLogs { get; set; }
    // private readonly ApplicationUser _applicationUser;
 
     //public ExpenseManagerDbContext(DbContextOptions<ExpenseManagerDbContext> options, IServiceProvider serviceProvider) : base(options)
@@ -29,7 +31,8 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
         var auditLogs = new List<AuditLog>();
         
         //
-        var userName = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "anonymous";
+        var userEmail = _httpContextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "anonymous";
 
 
         foreach (var entry in entyList)
@@ -50,7 +53,7 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
                 Action = entry.State.ToString(),
                 Timestamp = DateTime.Now,
                 //
-                UserName = userName,
+                UserName = userEmail,
                 //UserName = _applicationUser?.UserName ?? "anonymous",
                 ChangedValues = changedValuesString,
                 OriginalValues = originalValuesString,
@@ -59,14 +62,14 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
             if (entry.State == EntityState.Added)
             {
                 baseEntity.CreateDate = DateTime.Now;
-                baseEntity.CreateUser = userName;
+                baseEntity.CreateUser = userEmail;
                 //baseEntity.CreateUser = _applicationUser?.UserName ?? "anonymous";
                 baseEntity.IsActive = true;
             }
             else if (entry.State == EntityState.Modified)
             {
                 baseEntity.ModifyDate = DateTime.Now;
-                baseEntity.ModifyUser = userName;
+                baseEntity.ModifyUser = userEmail;
                 //baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
             }
             else if (entry.State == EntityState.Deleted)
@@ -74,7 +77,7 @@ public class ExpenseManagerDbContext : IdentityDbContext<ApplicationUser>
                 entry.State = EntityState.Modified;
                 baseEntity.IsActive = false;
                 baseEntity.ModifyDate = DateTime.Now;
-                baseEntity.ModifyUser = userName;
+                baseEntity.ModifyUser = userEmail;
                // baseEntity.ModifyUser = _applicationUser?.UserName ?? "anonymous";
             }
 
