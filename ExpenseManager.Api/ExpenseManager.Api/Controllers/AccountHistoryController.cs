@@ -10,24 +10,24 @@ namespace ExpenseManager.Api.Controllers;
 [Route("api/[controller]")]
 public class AccountHistoryController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
 
     public AccountHistoryController(IMediator mediator)
     {
-        this.mediator = mediator;
+        this._mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ApiResponse<List<AccountHistoryResponse>>> GetAll()
     {
-        var result = await mediator.Send(new GetAllAccountHistoriesQuery());
+        var result = await _mediator.Send(new GetAllAccountHistoriesQuery());
         return result;
     }
 
     [HttpGet("{id}")]
     public async Task<ApiResponse<AccountHistoryResponse>> GetById(int id)
     {
-        var result = await mediator.Send(new GetAccountHistoryByIdQuery(id));
+        var result = await _mediator.Send(new GetAccountHistoryByIdQuery(id));
         return result;
     }
 }

@@ -18,15 +18,15 @@ public class ExpenseCommandHandler :
     IRequestHandler<ApproveExpenseCommand, ApiResponse>,
     IRequestHandler<RejectExpenseCommand, ApiResponse>
 {
-    private readonly ExpenseManagerDbContext dbContext;
-    private readonly IMapper mapper;
+    private readonly ExpenseManagerDbContext _dbContext;
+    private readonly IMapper _mapper;
     private readonly IExpensePaymentTransactionService _expensePaymentTransactionService;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ExpenseCommandHandler(ExpenseManagerDbContext dbContext, IMapper mapper)
     {
-        this.dbContext = dbContext;
-        this.mapper = mapper;
+        this._dbContext = dbContext;
+        this._mapper = mapper;
         _httpContextAccessor = new HttpContextAccessor();
         _expensePaymentTransactionService = new ExpensePaymentTransactionService(dbContext);
         //aslında ihtiyac yok ama gpt koy dedi.
@@ -45,7 +45,7 @@ public class ExpenseCommandHandler :
 
         var userId = int.Parse(userIdClaim);
         
-        var expense = mapper.Map<Expense>(request.Expense);
+        var expense = _mapper.Map<Expense>(request.Expense);
         expense.UserId = userId;
         expense.ExpenseStatus = ExpenseStatus.Pending;
         expense.IsActive = true;
@@ -67,16 +67,16 @@ public class ExpenseCommandHandler :
         }
         
 
-        await dbContext.Set<Expense>().AddAsync(expense, cancellationToken);    
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.Set<Expense>().AddAsync(expense, cancellationToken);    
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = mapper.Map<ExpenseResponse>(expense);
+        var response = _mapper.Map<ExpenseResponse>(expense);
         return new ApiResponse<ExpenseResponse>(response);
     }
 
     public async Task<ApiResponse> Handle(UpdateExpenseCommand request, CancellationToken cancellationToken)
     {
-        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var expense = await _dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (expense == null)
             return new ApiResponse("Expense not found");
  
@@ -88,19 +88,19 @@ public class ExpenseCommandHandler :
         expense.ExpenseStatus = Enum.Parse<ExpenseStatus>(request.Expense.ExpenseStatus);
         
 
-        dbContext.Set<Expense>().Update(expense);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Set<Expense>().Update(expense);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse();
     }
     
     public async Task<ApiResponse> Handle (ApproveExpenseCommand request, CancellationToken cancellationToken)
     {
-        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
+        var expense = await _dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
         if (expense == null)
             return new ApiResponse("Expense not found");
 
-        var user = await dbContext.Set<User>()
+        var user = await _dbContext.Set<User>()
             .FirstOrDefaultAsync(x => x.Id == expense.UserId, cancellationToken);
 
         if (user != null)
@@ -116,37 +116,37 @@ public class ExpenseCommandHandler :
         //DEğiştirilecek cons olarak eklenecek 
         expense.PaymentMethod = "EFT";
 
-        dbContext.Set<Expense>().Update(expense);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Set<Expense>().Update(expense);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse();
     }
     
     public async Task<ApiResponse> Handle (RejectExpenseCommand request, CancellationToken cancellationToken)
     {
-        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
+        var expense = await _dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.ExpenseId, cancellationToken);
         if (expense == null)
             return new ApiResponse("Expense not found");
 
         expense.RejectionReason = request.RejectionReason;
         expense.ExpenseStatus = ExpenseStatus.Rejected;
 
-        dbContext.Set<Expense>().Update(expense);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Set<Expense>().Update(expense);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse();
     }
     
     public async Task<ApiResponse> Handle(CancelExpenseCommand request, CancellationToken cancellationToken)
     {
-        var expense = await dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var expense = await _dbContext.Set<Expense>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (expense == null)
             return new ApiResponse("Expense not found");
 
         expense.IsActive = false;
 
-        dbContext.Set<Expense>().Update(expense);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Set<Expense>().Update(expense);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse();
     }

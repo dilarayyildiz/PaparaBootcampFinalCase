@@ -12,17 +12,17 @@ namespace ExpenseManager.Api.Controllers;
 [Authorize(Roles = "Admin")] // sadece admin erişebilir
 public class ExpenseCategoryController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
 
     public ExpenseCategoryController(IMediator mediator)
     {
-        this.mediator = mediator;
+        this._mediator = mediator;
     }
     [HttpGet]
     public async Task<ApiResponse<List<ExpenseCategoryResponse>>> GetAllExpenseCategories()
     {
         var query = new GetAllExpenseCategoriesQuery();
-        var result = await mediator.Send(query);
+        var result = await _mediator.Send(query);
         return result;
     }
 
@@ -30,7 +30,7 @@ public class ExpenseCategoryController : ControllerBase
     public async Task<ApiResponse<ExpenseCategoryResponse>> GetExpenseCategoryById(int id)
     {
         var query = new GetExpenseCategoriesByIdQuery(id);
-        var result = await mediator.Send(query);
+        var result = await _mediator.Send(query);
         return result;
     }
 
@@ -38,7 +38,7 @@ public class ExpenseCategoryController : ControllerBase
     public async Task<ApiResponse<ExpenseCategoryResponse>> CreateExpenseCategory([FromBody] ExpenseCategoryRequest request)
     {
         var command = new CreateExpenseCategoryCommand(request);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 
@@ -46,7 +46,7 @@ public class ExpenseCategoryController : ControllerBase
     public async Task<ApiResponse> UpdateExpenseCategory(int id, [FromBody] ExpenseCategoryRequest request)
     {
         var command = new UpdateExpenseCategoryCommand(id, request);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 
@@ -54,7 +54,7 @@ public class ExpenseCategoryController : ControllerBase
     public async Task<ApiResponse> DeleteExpenseCategory(int id)
     {
         var command = new DeleteExpenseCategoryCommand(id);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 }

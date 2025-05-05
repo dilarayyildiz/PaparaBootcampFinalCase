@@ -13,12 +13,12 @@ namespace ExpenseManager.Api.Controllers;
 [Authorize] 
 public class ExpenseController : ControllerBase
 {
-    private readonly IMediator mediator;
+    private readonly IMediator _mediator;
     private readonly IWebHostEnvironment _environment;
 
     public ExpenseController(IMediator mediator, IWebHostEnvironment environment)
     {
-        this.mediator = mediator;
+        this._mediator = mediator;
         _environment = environment;
     }
     
@@ -26,7 +26,7 @@ public class ExpenseController : ControllerBase
     public async Task<ApiResponse<List<ExpenseResponse>>> GetAllExpenses()
     {
         var query = new GetAllExpenseQuery();
-        var result = await mediator.Send(query);
+        var result = await _mediator.Send(query);
         return result;
     }
 
@@ -34,7 +34,7 @@ public class ExpenseController : ControllerBase
     public async Task<ApiResponse<ExpenseResponse>> GetExpenseById(int id)
     {
         var query = new GetExpenseByIdQuery(id);
-        var result = await mediator.Send(query);
+        var result = await _mediator.Send(query);
         return result;
     }
 
@@ -43,26 +43,23 @@ public class ExpenseController : ControllerBase
     {
         string receiptUrl = null;
 
-        if (request.ReceiptFile != null && request.ReceiptFile.Length > 0)
+        var uploadsFolder = Path.Combine(_environment.WebRootPath, "receipts");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var uniqueFileName = Guid.NewGuid() + Path.GetExtension(request.ReceiptFile.FileName);
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
         {
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "receipts");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = Guid.NewGuid() + Path.GetExtension(request.ReceiptFile.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await request.ReceiptFile.CopyToAsync(stream);
-            }
-
-            //Uniqıelestirmek için user name ve date eklencek
-            receiptUrl = $"{Request.Scheme}://{Request.Host}/receipts/{uniqueFileName}";
+            await request.ReceiptFile.CopyToAsync(stream);
         }
+
+        //Uniqıelestirmek için user name ve date eklencek
+        receiptUrl = $"{Request.Scheme}://{Request.Host}/receipts/{uniqueFileName}";
         
         var command = new CreateExpenseCommand(receiptUrl, request);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 
@@ -71,7 +68,7 @@ public class ExpenseController : ControllerBase
     {
         
         var command = new UpdateExpenseCommand(id, request);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
     
@@ -80,7 +77,7 @@ public class ExpenseController : ControllerBase
     public async Task<ApiResponse> ApproveExpense(int id)
     {
         var command = new ApproveExpenseCommand(id);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 
@@ -89,7 +86,7 @@ public class ExpenseController : ControllerBase
     public async Task<ApiResponse> RejectExpense(int id, [FromBody] RejectExpenseRequest request)
     {
         var command = new RejectExpenseCommand(id, request.RejectionReason);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
     
@@ -97,7 +94,7 @@ public class ExpenseController : ControllerBase
     public async Task<ApiResponse> DeleteExpense(int id)
     {
         var command = new CancelExpenseCommand(id);
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 }

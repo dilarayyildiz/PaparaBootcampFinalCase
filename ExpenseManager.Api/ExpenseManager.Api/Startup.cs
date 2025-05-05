@@ -11,6 +11,7 @@ using ExpenseManager.Api.Services.ReportService;
 using ExpenseManager.Api.Services.Token;
 using ExpenseManager.Base;
 using ExpenseManager.Base.Token;
+using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,7 @@ public class Startup
         JwtConfig = Configuration.GetSection("JwtConfig").Get<JwtConfig>();
         services.AddSingleton<JwtConfig>(JwtConfig);
         services.AddAutoMapper(typeof(MapperConfig));
-        services.AddControllers(); 
+        services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());; 
         services.AddDbContext<ExpenseManagerDbContext>(options =>
         {
             options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerDbConnection"));
