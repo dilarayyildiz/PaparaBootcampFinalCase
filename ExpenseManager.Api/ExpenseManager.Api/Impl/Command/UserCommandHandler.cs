@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Cqrs;
+using ExpenseManager.Api.Impl.UnitOfWork;
 using ExpenseManager.Base;
 using ExpenseManager.Base.ApiResponse;
 using ExpenseManager.Base.Encryption;
@@ -16,48 +17,42 @@ public class UserCommandHandler:
     IRequestHandler<DeleteUserCommand, ApiResponse>,
     IRequestHandler<ChangeUserPasswordCommand, ApiResponse>
 {
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IMapper _mapper;
     
-    private readonly ExpenseManagerDbContext dbContext;
-    private readonly IMapper mapper;
     private readonly IAppSession appSession;
     
-    public  UserCommandHandler(ExpenseManagerDbContext dbContext, IMapper mapper, IAppSession appSession)
+    public  UserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IAppSession appSession)
     {
-        this.dbContext = dbContext;
-        this.mapper = mapper;
+        this.unitOfWork = unitOfWork;
+        this._mapper = mapper;
         this.appSession = appSession;
     }
     
     public async Task<ApiResponse<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var existing = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Email == request.User.Email, cancellationToken);
+        var existing = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Email == request.User.Email);
         if (existing != null)
             return new ApiResponse<UserResponse>("This email is already registered");
 
         
-        var user = mapper.Map<User>(request.User);
+        var user = _mapper.Map<User>(request.User);
         
         user.Secret = Guid.NewGuid().ToString();
         user.PasswordHash = PasswordGenerator.CreateMD5(request.User.Password, user.Secret);
         user.IsActive = true;  
         
-        await dbContext.AddAsync(user, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await unitOfWork.UserRepository.AddAsync(user, cancellationToken); 
+        await unitOfWork.Complete(cancellationToken);
 
-        var response = mapper.Map<UserResponse>(user);
+        var response = _mapper.Map<UserResponse>(user);
         return new ApiResponse<UserResponse>(response);
-        
-        //TESTLERDEN SONRA BASARILI CALISIRSA ALTI SIL!!!
-        //var entity = await dbContext.AddAsync(user, cancellationToken);
-        //await dbContext.SaveChangesAsync(cancellationToken);
-        //var response = mapper.Map<UserResponse>(entity.Entity);
-
-        //return new ApiResponse<UserResponse>(response);
+         
     }
    
     public async Task<ApiResponse> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var user = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Id == request.Id);
         if (user == null)
             return new ApiResponse("User not found");
 
@@ -69,16 +64,14 @@ public class UserCommandHandler:
         
         //Iban update olursa bankacılık bozulur DEGERLENDIR
         //user.IBAN = request.User.IBAN; 
-        dbContext.Set<User>().Update(user);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        
-        //TESTLER SONRASI BAKILACAK
-        //await dbContext.SaveChangesAsync(cancellationToken);
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.Complete(cancellationToken);
+         
         return new ApiResponse();
     }
     public async Task<ApiResponse> Handle(ChangeUserPasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Email == request.User.email, cancellationToken);
+        var user = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Email == request.User.email);
         if (user == null)
             return new ApiResponse("User not found");
 
@@ -88,13 +81,15 @@ public class UserCommandHandler:
         user.Secret = Guid.NewGuid().ToString();
         user.PasswordHash = PasswordGenerator.CreateMD5(request.User.Password, user.Secret); 
          
-        dbContext.Set<User>().Update(user);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.Complete(cancellationToken);
+        
         return new ApiResponse();
     }
+    
     public async Task<ApiResponse> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var user = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Id == request.Id);
         if (user == null)
             return new ApiResponse("User not found");
 
@@ -104,12 +99,9 @@ public class UserCommandHandler:
         //Soft delete yapıyoruz..
         user.IsActive = false;
 
-        dbContext.Set<User>().Update(user);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        
-        //TESTLER SONRASI BAKILACAK
-        //await dbContext.SaveChangesAsync(cancellationToken);
-        
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.Complete(cancellationToken);
+          
         return new ApiResponse();
     }
 

@@ -1,5 +1,6 @@
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Cqrs;
+using ExpenseManager.Api.Impl.UnitOfWork;
 using ExpenseManager.Api.Services.Token;
 using Microsoft.EntityFrameworkCore;
 using ExpenseManager.Base.ApiResponse;
@@ -13,19 +14,19 @@ namespace ExpenseManager.Api.Impl.Command;
 public class AuthorizationCommandHandler :
     IRequestHandler<CreateAuthorizationTokenCommand, ApiResponse<AuthorizationResponse>>
 {
-    private readonly ExpenseManagerDbContext dbContext;
+    private readonly IUnitOfWork unitOfWork;
     private readonly ITokenService tokenService;
     private readonly JwtConfig jwtConfig;
 
-    public AuthorizationCommandHandler(ExpenseManagerDbContext dbContext, ITokenService tokenService, JwtConfig jwtConfig)
+    public AuthorizationCommandHandler(IUnitOfWork unitOfWork, ITokenService tokenService, JwtConfig jwtConfig)
     {
         this.jwtConfig = jwtConfig;
-        this.dbContext = dbContext;
+        this.unitOfWork = unitOfWork;
         this.tokenService = tokenService;
     }
     public async Task<ApiResponse<AuthorizationResponse>> Handle(CreateAuthorizationTokenCommand request, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Email == request.Request.Email, cancellationToken);
+        var user = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Email == request.Request.Email);
         if (user == null)
             return new ApiResponse<AuthorizationResponse>("Email is incorrect");
 

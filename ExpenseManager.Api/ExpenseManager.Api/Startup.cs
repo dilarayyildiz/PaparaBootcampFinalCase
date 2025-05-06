@@ -4,9 +4,14 @@ using AutoMapper;
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Command;
 using ExpenseManager.Api.Impl.Cqrs;
+using ExpenseManager.Api.Impl.GenericRepository;
+using ExpenseManager.Api.Impl.UnitOfWork;
+using ExpenseManager.Api.Impl.Validation;
 using ExpenseManager.Api.Mapper;
 using ExpenseManager.Api.Services.AccountHistory;
 using ExpenseManager.Api.Services.BankPaymentService;
+using ExpenseManager.Api.Services.Cashe;
+using ExpenseManager.Api.Services.RedisCache;
 using ExpenseManager.Api.Services.ReportService;
 using ExpenseManager.Api.Services.Token;
 using ExpenseManager.Base;
@@ -18,6 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 namespace ExpenseManager.Api;
 
@@ -32,7 +38,7 @@ public class Startup
         JwtConfig = Configuration.GetSection("JwtConfig").Get<JwtConfig>();
         services.AddSingleton<JwtConfig>(JwtConfig);
         services.AddAutoMapper(typeof(MapperConfig));
-        services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());; 
+        services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserValidator>());; 
         services.AddDbContext<ExpenseManagerDbContext>(options =>
         {
             options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerDbConnection"));
@@ -53,6 +59,13 @@ public class Startup
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IExpensePaymentTransactionService, ExpensePaymentTransactionService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+        // Redis CacheService
+        var redisConnection = Configuration.GetConnectionString("RedisConnection");
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnection));
+        services.AddScoped<ICacheService, RedisCacheService>();
 
         // HttpContextAccessor + AppSession
         services.AddHttpContextAccessor();

@@ -23,21 +23,32 @@ public class ExpenseController : ControllerBase
     }
     
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<ApiResponse<List<ExpenseResponse>>> GetAllExpenses()
     {
         var query = new GetAllExpenseQuery();
         var result = await _mediator.Send(query);
         return result;
     }
+    
+    [HttpGet("YourExpenses")]
+    [Authorize(Roles = "Admin,Employee")]
+    public async Task<ApiResponse<List<ExpenseResponse>>> GetYourExpenses()
+    {
+        var query = new GetExpenseByUser();
+        var result = await _mediator.Send(query);
+        return result;
+    }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ApiResponse<ExpenseResponse>> GetExpenseById(int id)
     {
         var query = new GetExpenseByIdQuery(id);
         var result = await _mediator.Send(query);
         return result;
     }
-
+     
     [HttpPost("CreateExpense")]
     public async Task<ApiResponse<ExpenseResponse>> CreateExpense([FromForm] CreateExpenseRequest request)
     {

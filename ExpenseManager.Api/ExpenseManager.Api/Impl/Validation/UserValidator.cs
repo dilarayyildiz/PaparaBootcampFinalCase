@@ -1,3 +1,4 @@
+using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Schema;
 using FluentValidation;
 
@@ -14,5 +15,20 @@ public class UserValidator : AbstractValidator<UserRequest>
         RuleFor(x => x.Role).NotEmpty().Must(r => r == "Admin" || r == "Employee")
             .WithMessage("Role must be either 'Admin' or 'Employee'.");
         RuleFor(x => x.IBAN).NotEmpty();
+    }
+    
+    public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+    {
+        public CreateUserCommandValidator()
+        {
+            RuleFor(x => x.User).SetValidator(new UserValidator());
+        }
+    }
+    public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+    {
+        public UpdateUserCommandValidator()
+        {
+            RuleFor(x => x.User).SetValidator(new UserValidator());
+        }
     }
 }

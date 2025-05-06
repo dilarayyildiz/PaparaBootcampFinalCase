@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseManager.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-[Authorize(Roles = "Admin")] // sadece admin erişebilir
+[Route("api/[controller]")]// sadece admin erişebilir
 public class ExpenseCategoryController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -19,6 +18,7 @@ public class ExpenseCategoryController : ControllerBase
         this._mediator = mediator;
     }
     [HttpGet]
+    [Authorize(Roles = "Admin,Employee")] 
     public async Task<ApiResponse<List<ExpenseCategoryResponse>>> GetAllExpenseCategories()
     {
         var query = new GetAllExpenseCategoriesQuery();
@@ -27,6 +27,7 @@ public class ExpenseCategoryController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Employee")] 
     public async Task<ApiResponse<ExpenseCategoryResponse>> GetExpenseCategoryById(int id)
     {
         var query = new GetExpenseCategoriesByIdQuery(id);
@@ -35,6 +36,7 @@ public class ExpenseCategoryController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")] 
     public async Task<ApiResponse<ExpenseCategoryResponse>> CreateExpenseCategory([FromBody] ExpenseCategoryRequest request)
     {
         var command = new CreateExpenseCategoryCommand(request);
@@ -43,6 +45,7 @@ public class ExpenseCategoryController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")] 
     public async Task<ApiResponse> UpdateExpenseCategory(int id, [FromBody] ExpenseCategoryRequest request)
     {
         var command = new UpdateExpenseCategoryCommand(id, request);
@@ -51,6 +54,7 @@ public class ExpenseCategoryController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")] 
     public async Task<ApiResponse> DeleteExpenseCategory(int id)
     {
         var command = new DeleteExpenseCategoryCommand(id);
