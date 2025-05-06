@@ -1,0 +1,9 @@
+USE ExpenseManager
+GO
+
+INSERT INTO ExpenseManager.dbo.[User] 
+(FirstName,LastName,Email,Phone,PasswordHash,Secret,[Role],IBAN,CreateUser,CreateDate,ModifyUser,ModifyDate,IsActive) 
+VALUES
+	 (N'Dilara',N'Ayyildiz',N'dilara@gmail.com',N'5551234567',N'7A7C07274A7B8D1EB1D64DD2E7363EC6',N'ac1f9029-1f80-421d-9737-1f93b0915afd',1,N'TR120006200000000123456789',N'system','2025-05-04 15:50:06.5133333',N'','1900-01-01 00:00:00.0000000',1),
+	 (N'Gökhan',N'Ayyıldız',N'gokhan@gmail.com',N'5316999088',N'7A7C07274A7B8D1EB1D64DD2E7363EC6',N'ac1f9029-1f80-421d-9737-1f93b0915afd',2,N'TR760009901234567800100001',N'anonymous','2025-05-04 19:25:23.1028950',N'gokhan@gmail.com','2025-05-04 23:22:04.1443530',1),
+	 (N'Ahmet',N'Mehmet',N'ahmetmehmet@gmail.com',N'5326666777',N'2F8364E668585C97C498F9F15AF3A208',N'6d059c81-15fb-4f4d-b3d0-7908e1231217',2,N'TR760009901239567800100001',N'dilara@gmail.com','2025-05-05 21:11:46.5684140',NULL,NULL,1)
