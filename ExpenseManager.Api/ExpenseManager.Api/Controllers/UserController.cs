@@ -45,7 +45,7 @@ public  class UserController : ControllerBase
     }
     
     [HttpPut("ChangePassword")]
-    [Authorize(Roles = "Employee")]  
+    [Authorize(Roles = "Employee,Admin")]  
     public async Task<IActionResult> ChangeUserPassword(ChangeUserPasswordCommand request)
     {
         var user = await _mediator.Send(request);

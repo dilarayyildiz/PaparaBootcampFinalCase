@@ -19,6 +19,7 @@ public class UserCommandHandler:
 {
     private readonly IUnitOfWork unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     
     private readonly IAppSession appSession;
     
@@ -27,6 +28,7 @@ public class UserCommandHandler:
         this.unitOfWork = unitOfWork;
         this._mapper = mapper;
         this.appSession = appSession;
+        _httpContextAccessor = new HttpContextAccessor();
     }
     
     public async Task<ApiResponse<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -71,12 +73,26 @@ public class UserCommandHandler:
     }
     public async Task<ApiResponse> Handle(ChangeUserPasswordCommand request, CancellationToken cancellationToken)
     {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == "UserId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim))
+        {
+            return new ApiResponse("Unauthorized or missing UserId claim");
+        } 
+        var userId = int.Parse(userIdClaim);
+        
         var user = await unitOfWork.UserRepository.FirstOrDefaultAsync(x => x.Email == request.User.email);
+        
         if (user == null)
             return new ApiResponse("User not found");
 
         if (!user.IsActive)
             return new ApiResponse("User is not active");
+
+        if (userId != user.Id)
+            return new ApiResponse("You are not authorized to change this user's password");
+        
  
         user.Secret = Guid.NewGuid().ToString();
         user.PasswordHash = PasswordGenerator.CreateMD5(request.User.Password, user.Secret); 
