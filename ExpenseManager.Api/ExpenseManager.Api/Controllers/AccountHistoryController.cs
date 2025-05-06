@@ -17,14 +17,14 @@ public class AccountHistoryController : ControllerBase
         this._mediator = mediator;
     }
 
-    [HttpGet]
+    [HttpGet("MyAccountTransactions")]
     public async Task<ApiResponse<List<AccountHistoryResponse>>> GetAll()
     {
         var result = await _mediator.Send(new GetAllAccountHistoriesQuery());
         return result;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("AccountTransactionDetail/{id}")]
     public async Task<ApiResponse<AccountHistoryResponse>> GetById(int id)
     {
         var result = await _mediator.Send(new GetAccountHistoryByIdQuery(id));
