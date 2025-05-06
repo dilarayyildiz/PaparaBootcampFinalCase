@@ -14,7 +14,11 @@ public class UserValidator : AbstractValidator<UserRequest>
         RuleFor(x => x.Password).NotEmpty().MinimumLength(5);
         RuleFor(x => x.Role).NotEmpty().Must(r => r == "Admin" || r == "Employee")
             .WithMessage("Role must be either 'Admin' or 'Employee'.");
-        RuleFor(x => x.IBAN).NotEmpty();
+        RuleFor(x => x.IBAN)
+            .NotEmpty()
+            .Matches("^TR[0-9]{2}[0-9]{5}[0-9]{16}$")
+            .WithMessage("IBAN must be a valid Turkish format (TR followed by 24 digits).");
+
     }
     
     public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>

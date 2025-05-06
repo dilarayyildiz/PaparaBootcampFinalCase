@@ -3,6 +3,7 @@ using AutoMapper;
 using ExpenseManager.Api.Entities;
 using ExpenseManager.Api.Impl.Cqrs;
 using ExpenseManager.Api.Impl.UnitOfWork;
+using ExpenseManager.Api.Request;
 using ExpenseManager.Api.Services.AccountHistory;
 using ExpenseManager.Api.Services.BankPaymentService;
 using ExpenseManager.Base.ApiResponse;
@@ -13,7 +14,7 @@ using MediatR;
 namespace ExpenseManager.Api.Impl.Command;
 
 public class ExpenseCommandHandler :
-    IRequestHandler<CreateExpenseCommand, ApiResponse<ExpenseResponse>>,
+    IRequestHandler<CreateExpenseCommand, ApiResponse<CreateExpenseResponse>>,
     IRequestHandler<UpdateExpenseCommand, ApiResponse>,
     IRequestHandler<CancelExpenseCommand, ApiResponse>,
     IRequestHandler<ApproveExpenseCommand, ApiResponse>,
@@ -34,14 +35,14 @@ public class ExpenseCommandHandler :
         //this.accountHistoryService = accountHistoryService;
     }
 
-    public async Task<ApiResponse<ExpenseResponse>> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CreateExpenseResponse>> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
     {
         var userIdClaim = _httpContextAccessor.HttpContext?.User?.Claims
             .FirstOrDefault(c => c.Type == "UserId")?.Value;
 
         if (string.IsNullOrEmpty(userIdClaim))
         {
-            return new ApiResponse<ExpenseResponse>("Unauthorized or missing UserId claim");
+            return new ApiResponse<CreateExpenseResponse>("Unauthorized or missing UserId claim");
         }
 
         var userId = int.Parse(userIdClaim);
@@ -70,9 +71,15 @@ public class ExpenseCommandHandler :
 
         await unitOfWork.ExpenseRepository.AddAsync(expense, cancellationToken);
         await unitOfWork.Complete(cancellationToken);
-
-        var response = _mapper.Map<ExpenseResponse>(expense);
-        return new ApiResponse<ExpenseResponse>(response);
+        
+        expense = await unitOfWork.ExpenseRepository.GetWithIncludesAsync(
+            e => e.Id == expense.Id,
+            cancellationToken,
+            e => e.User,
+            e => e.Category
+        );
+        var response = _mapper.Map<CreateExpenseResponse>(expense);
+        return new ApiResponse<CreateExpenseResponse>(response);
     }
 
     public async Task<ApiResponse> Handle(UpdateExpenseCommand request, CancellationToken cancellationToken)

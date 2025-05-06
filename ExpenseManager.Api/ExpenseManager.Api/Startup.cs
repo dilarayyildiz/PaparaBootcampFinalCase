@@ -8,6 +8,7 @@ using ExpenseManager.Api.Impl.GenericRepository;
 using ExpenseManager.Api.Impl.UnitOfWork;
 using ExpenseManager.Api.Impl.Validation;
 using ExpenseManager.Api.Mapper;
+using ExpenseManager.Api.Middleware;
 using ExpenseManager.Api.Services.AccountHistory;
 using ExpenseManager.Api.Services.BankPaymentService;
 using ExpenseManager.Api.Services.Cashe;
@@ -43,17 +44,11 @@ public class Startup
         {
             options.UseSqlServer(Configuration.GetConnectionString("ExpenseManagerDbConnection"));
         });
-        //services.AddMediatR(Assembly.GetExecutingAssembly());
+        
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
         });
-        //services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(AuthorizationCommandHandler).GetTypeInfo().Assembly));
-        
-        /* services.AddControllers().AddFluentValidation(x =>
-        {
-            x.RegisterValidatorsFromAssemblyContaining<CustomerValidator>();
-        });*!!!!açılacak*/
         
         // TokenService
         services.AddScoped<ITokenService, TokenService>();
@@ -118,8 +113,7 @@ public class Startup
                 { securityScheme, new string[] { } }
             });
         });
-        
-        // CORS (if needed)
+         
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", builder =>
@@ -129,8 +123,7 @@ public class Startup
                     .AllowAnyHeader();
             });
         });
-        
-        /////////////services.AddSwaggerGen(); 
+         
     }
    
 
@@ -141,16 +134,15 @@ public class Startup
         app.UseSwaggerUI();
         if (env.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
-            
+            app.UseDeveloperExceptionPage(); 
         }
-        
+        app.UseMiddleware<ErrorHandlerMiddleware>();
    
         app.UseHttpsRedirection();
         
         app.UseRouting();
         
-        app.UseCors("AllowAll"); // if CORS policy is used
+        app.UseCors("AllowAll");  
         
         app.UseAuthentication();
         app.UseAuthorization(); 

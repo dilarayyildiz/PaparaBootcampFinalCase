@@ -24,6 +24,9 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<CompanyExpenseSummaryDto>> GetCompanyExpenseSummaryByDateRange(DateTime startDate, DateTime endDate)
     {
+        if (endDate < startDate)
+            throw new ArgumentException("End date must be after start date.");
+
         using var connection = new SqlConnection(_configuration.GetConnectionString("ExpenseManagerDbConnection"));
         var result = await connection.QueryAsync<CompanyExpenseSummaryDto>(
             "sp_CompanyExpenseSummaryByDateRange",
@@ -34,6 +37,9 @@ public class ReportService : IReportService
     
     public async Task<IEnumerable<EmployeeExpenseSummaryDto>> GetEmployeeExpenseSummaryByDateRange(DateTime startDate, DateTime endDate)
     {
+        if (endDate < startDate)
+            throw new ArgumentException("End date must be after start date.");
+
         using var connection = new SqlConnection(_configuration.GetConnectionString("ExpenseManagerDbConnection"));
         var result = await connection.QueryAsync<EmployeeExpenseSummaryDto>(
             "sp_EmployeeExpenseSummaryByDateRange",
@@ -44,6 +50,9 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<ApprovalRejectionSummaryDto>> GetApprovalRejectionSummaryByDateRange(DateTime startDate, DateTime endDate)
     {
+        if (endDate < startDate)
+            throw new ArgumentException("End date must be after start date.");
+
         using var connection = new SqlConnection(_configuration.GetConnectionString("ExpenseManagerDbConnection"));
         var result = await connection.QueryAsync<ApprovalRejectionSummaryDto>(
             "sp_ApprovalRejectionSummaryByDateRange",

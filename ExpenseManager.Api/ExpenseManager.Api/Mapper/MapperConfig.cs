@@ -24,8 +24,11 @@ public class MapperConfig : Profile
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FirstName + " " + src.User.LastName))
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => src.ExpenseStatus.ToString()));
-        
-        CreateMap<CreateExpenseRequest, Expense>()
+
+        CreateMap<CreateExpenseRequest, Expense>();
+        CreateMap<Expense, CreateExpenseResponse>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FirstName + " " + src.User.LastName))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.ExpenseStatus, opt => opt.MapFrom(src => ExpenseStatus.Pending)) // çünkü enum string geliyor
             .ForMember(dest => dest.ReceiptUrl, opt => opt.Ignore()) // bu dosya işlemi handler’da yapılacak
             .ForMember(dest => dest.Id, opt => opt.Ignore()); // Id DB tarafından atanacak

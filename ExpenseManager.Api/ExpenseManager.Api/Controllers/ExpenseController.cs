@@ -50,7 +50,7 @@ public class ExpenseController : ControllerBase
     }
      
     [HttpPost("CreateExpense")]
-    public async Task<ApiResponse<ExpenseResponse>> CreateExpense([FromForm] CreateExpenseRequest request)
+    public async Task<ApiResponse<CreateExpenseResponse>> CreateExpense([FromForm] CreateExpenseRequest request)
     {
         string receiptUrl = null;
 
@@ -65,8 +65,7 @@ public class ExpenseController : ControllerBase
         {
             await request.ReceiptFile.CopyToAsync(stream);
         }
-
-        //Uniqıelestirmek için user name ve date eklencek
+ 
         receiptUrl = $"{Request.Scheme}://{Request.Host}/receipts/{uniqueFileName}";
         
         var command = new CreateExpenseCommand(receiptUrl, request);
